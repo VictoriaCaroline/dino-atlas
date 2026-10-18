@@ -5,7 +5,7 @@ import { feature } from 'topojson-client'
 import type { Topology, GeometryCollection } from 'topojson-specification'
 import paises110m from 'world-atlas/countries-110m.json'
 import { EChart } from './EChart'
-import { COR, FONTE, GRUPOS, corPeriodo, fmt } from '../theme'
+import { COR, FONTE, GRUPOS, PERIODOS, fmt } from '../theme'
 import type { FaixaTempo, Fatia, PaisTotal, Ponto } from '../types'
 
 const topo = paises110m as unknown as Topology<{ countries: GeometryCollection }>
@@ -22,6 +22,15 @@ const tip = {
 const eixo = { color: COR.muted, fontFamily: FONTE.term, fontSize: 16 }
 
 export function WorldMap({ pontos, onSelect }: { pontos: Ponto[]; onSelect: (genero: string) => void }) {
+  // Uma série por período: no modo large o ECharts ignora cor por ponto, só respeita a cor da série.
+  // Pelo mesmo motivo os pontos vão como [lng, lat] puros e o Ponto é recuperado por seriesIndex/dataIndex.
+  const porPeriodo = useMemo(
+    () => PERIODOS.map((per) => ({ ...per, pontos: pontos.filter((p) => p.periodo === per.nome) })).filter((g) => g.pontos.length),
+    [pontos],
+  )
+  const achar = (serie?: number, idx?: number) =>
+    serie === undefined || idx === undefined ? undefined : porPeriodo[serie]?.pontos[idx]
+
   const option = useMemo<EChartsOption>(() => {
     const grande = pontos.length > 2000
     return {
@@ -29,7 +38,7 @@ export function WorldMap({ pontos, onSelect }: { pontos: Ponto[]; onSelect: (gen
         ...tip,
         trigger: 'item',
         formatter: (p: any) => {
-          const pt: Ponto | undefined = p.data?.p
+          const pt = achar(p.seriesIndex, p.dataIndex)
           if (!pt) return p.name
           const nome = pt.genero ?? `${pt.nome} (indet.)`
           return `${nome}<br>${pt.periodo} · ${pt.grupo}`
@@ -44,23 +53,26 @@ export function WorldMap({ pontos, onSelect }: { pontos: Ponto[]; onSelect: (gen
         itemStyle: { areaColor: '#262626', borderColor: COR.dim, borderWidth: 1 },
         emphasis: { itemStyle: { areaColor: '#3a3a3a' }, label: { show: false } },
       },
-      series: [{
+      series: porPeriodo.map((g) => ({
         type: 'scatter',
+        name: g.nome,
         coordinateSystem: 'geo',
         symbol: 'rect',
         symbolSize: grande ? 4 : 9,
         large: grande,
-        data: pontos.map((p) => ({ value: [p.lng, p.lat], p, itemStyle: { color: corPeriodo(p.periodo) } })),
-      }],
+        largeThreshold: 2000,
+        itemStyle: { color: g.cor },
+        data: g.pontos.map((p) => [p.lng, p.lat]),
+      })),
     }
-  }, [pontos])
+  }, [porPeriodo])
 
   return (
     <EChart
       option={option}
       height={480}
       onClick={(e) => {
-        const pt = (e.data as { p?: Ponto } | undefined)?.p
+        const pt = achar(e.seriesIndex, e.dataIndex)
         if (pt?.genero) onSelect(pt.genero)
       }}
     />

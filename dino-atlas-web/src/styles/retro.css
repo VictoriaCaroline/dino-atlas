@@ -81,8 +81,8 @@ h1 { font-family: var(--f-pixel); font-weight: 400; font-size: clamp(20px, 3.6vw
 
 .stack { display: grid; gap: 14px; }
 .hp { display: grid; gap: 6px; }
-.hp-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.hp-top b { font-family: var(--f-pixel); font-size: 10px; font-weight: 400; }
+.hp-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 8px; }
+.hp-top b { font-family: var(--f-pixel); font-size: 10px; font-weight: 400; line-height: 1.6; min-width: 0; overflow-wrap: anywhere; }
 .hp-top span { font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .bar {
   height: 16px; background: #d9d9d9; position: relative; margin: 0 var(--px); --b: #8a8a8a;
