@@ -54,9 +54,35 @@ export function QuestLog({ ficha, animar }: { ficha: FichaGenero | null; animar:
         <dt>MAPA</dt>
         <dd>{ficha.paises.map((p) => p.nome).join(', ')}</dd>
       </dl>
-      <a href={ficha.wikipedia} target="_blank" rel="noopener noreferrer">
-        &gt; Abrir verbete
-      </a>
+      <Lore ficha={ficha} />
     </>
+  )
+}
+
+const ROTULO_LINK = {
+  pt: '> Abrir verbete',
+  en: '> Abrir verbete (inglês)',
+  pbdb: '> Ver ficha no PBDB',
+}
+
+function Lore({ ficha }: { ficha: FichaGenero }) {
+  const v = ficha.verbete
+  return (
+    <div className="lore">
+      {v.imagem && (
+        <div className="lore-img px">
+          <img src={v.imagem} alt={v.titulo} loading="lazy" />
+        </div>
+      )}
+      {v.resumo && (
+        <p className="lore-txt" lang={v.fonte}>
+          {v.resumo}
+        </p>
+      )}
+      {v.fonte === 'pbdb' && <p className="lore-txt vazio">Sem verbete na Wikipédia em português nem em inglês.</p>}
+      <a href={v.url} target="_blank" rel="noopener noreferrer">
+        {ROTULO_LINK[v.fonte]}
+      </a>
+    </div>
   )
 }

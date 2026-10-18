@@ -109,7 +109,7 @@ export const mockApi: AtlasApi = {
     return atraso({
       genero: d.nome, grupo: nomeDe(GRUPOS, d.grupo), dieta: nomeDe(DIETAS, d.dieta), periodo: nomeDe(PERIODOS, d.periodo),
       idadeMaxMa: d.ma, idadeMinMa: d.ma, ocorrencias: soma(l), paises: topPaises(l, 5),
-      wikipedia: `https://pt.wikipedia.org/wiki/${d.genero}`,
+      verbete: { fonte: 'pt' as const, titulo: d.nome, resumo: null, imagem: null, url: `https://pt.wikipedia.org/wiki/${d.nome}` },
     })
   },
 }

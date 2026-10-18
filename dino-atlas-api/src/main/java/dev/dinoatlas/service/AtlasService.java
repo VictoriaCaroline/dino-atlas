@@ -4,6 +4,8 @@ import dev.dinoatlas.domain.Agregador;
 import dev.dinoatlas.domain.Filtro;
 import dev.dinoatlas.domain.Ocorrencia;
 import dev.dinoatlas.repo.OcorrenciaRepository;
+import dev.dinoatlas.wiki.Verbete;
+import dev.dinoatlas.wiki.VerbeteResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,12 +18,14 @@ public class AtlasService {
 
     public record FichaGenero(String genero, String grupo, String dieta, String periodo,
                               double idadeMaxMa, double idadeMinMa, long ocorrencias,
-                              List<Agregador.PaisTotal> paises, String wikipedia) {}
+                              List<Agregador.PaisTotal> paises, Verbete verbete) {}
 
     private final OcorrenciaRepository repo;
+    private final VerbeteResolver verbetes;
 
-    public AtlasService(OcorrenciaRepository repo) {
+    public AtlasService(OcorrenciaRepository repo, VerbeteResolver verbetes) {
         this.repo = repo;
+        this.verbetes = verbetes;
     }
 
     public Agregador.Resumo resumo(Filtro f) {
@@ -60,7 +64,7 @@ public class AtlasService {
         return new FichaGenero(ref.genero(), ref.grupo().nome(), ref.dieta().nome(), ref.periodo().nome(),
                 resumo.idadeMaxMa(), resumo.idadeMinMa(), lista.size(),
                 Agregador.topPaises(lista, 5),
-                "https://pt.wikipedia.org/wiki/" + ref.genero());
+                verbetes.resolver(ref.genero()));
     }
 
     private List<Ocorrencia> filtrar(Filtro f) {

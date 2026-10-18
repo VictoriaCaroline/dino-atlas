@@ -54,7 +54,15 @@ export interface FichaGenero {
   idadeMinMa: number
   ocorrencias: number
   paises: PaisTotal[]
-  wikipedia: string
+  verbete: Verbete
+}
+
+export interface Verbete {
+  fonte: 'pt' | 'en' | 'pbdb'
+  titulo: string
+  resumo: string | null
+  imagem: string | null
+  url: string
 }
 
 export interface AtlasApi {

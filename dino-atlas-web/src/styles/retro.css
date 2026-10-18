@@ -104,6 +104,14 @@ h1 { font-family: var(--f-pixel); font-weight: 400; font-size: clamp(20px, 3.6vw
 .stats dd { margin: 0; }
 .vazio { color: var(--muted); margin: 0; }
 
+.lore { display: grid; gap: 10px; }
+.lore-img { padding: 0; --b: var(--frame-dim); background: #000; }
+.lore-img img { display: block; width: 100%; max-height: 180px; object-fit: contain; }
+.lore-txt {
+  margin: 0; font-size: 18px; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden;
+}
+
 a { color: var(--blue); }
 a:focus-visible { outline: 2px dashed var(--yellow); outline-offset: 3px; }
 footer { font-size: 17px; color: var(--muted); text-align: right; }
