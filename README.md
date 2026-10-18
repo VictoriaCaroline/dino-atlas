@@ -11,6 +11,10 @@ Painel interativo em estilo 8-bit com todas as ocorrências fósseis de dinossau
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square)
 ![ECharts](https://img.shields.io/badge/ECharts-5-AA344D?style=flat-square)
 
+**[Ver demo](https://victoriacaroline.github.io/dino-atlas/)**
+
+<sub>A demo roda só o front, com uma amostra embutida. O projeto completo, com os 37 mil registros do PBDB, roda localmente com o back-end.</sub>
+
 </div>
 
 ## Sobre
