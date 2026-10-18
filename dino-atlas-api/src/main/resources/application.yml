@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+atlas:
+  pbdb:
+    base-url: https://paleobiodb.org/data1.2
+    timeout-seconds: 600
+  cache:
+    arquivo: ./data/pbdb-cache.json
+    max-idade-dias: 7
+  cors:
+    origens: http://localhost:5173
