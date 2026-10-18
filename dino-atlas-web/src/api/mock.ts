@@ -1,4 +1,4 @@
-import type { AtlasApi, Dieta, Filtro, Grupo, PaisTotal, Periodo } from '../types'
+import type { AtlasApi, Dieta, Filtro, Grupo, PaisTotal, Periodo, Verbete } from '../types'
 import { DIETAS, GRUPOS, PERIODOS } from '../theme'
 
 // Amostra para rodar sem back-end. Gêneros e locais reais, contagens ilustrativas.
@@ -102,14 +102,52 @@ export const mockApi: AtlasApi = {
       id: d.id, genero: d.genero, nome: d.nome, lat: d.lat, lng: d.lng,
       periodo: nomeDe(PERIODOS, d.periodo), grupo: nomeDe(GRUPOS, d.grupo),
     }))),
-  genero: (nome) => {
+  genero: async (nome, signal) => {
     const l = DADOS.filter((d) => d.genero?.toLowerCase() === nome.toLowerCase())
-    if (!l.length) return Promise.reject(new Error(`Gênero não encontrado: ${nome}`))
+    if (!l.length) throw new Error(`Gênero não encontrado: ${nome}`)
     const d = l[0]
-    return atraso({
+    return {
       genero: d.nome, grupo: nomeDe(GRUPOS, d.grupo), dieta: nomeDe(DIETAS, d.dieta), periodo: nomeDe(PERIODOS, d.periodo),
       idadeMaxMa: d.ma, idadeMinMa: d.ma, ocorrencias: soma(l), paises: topPaises(l, 5),
-      verbete: { fonte: 'pt' as const, titulo: d.nome, resumo: null, imagem: null, url: `https://pt.wikipedia.org/wiki/${d.nome}` },
-    })
+      verbete: await verbete(d.nome, signal),
+    }
   },
+}
+
+// Sem back-end, a mesma cadeia do VerbeteResolver roda no navegador (a API de resumos da Wikipédia aceita CORS)
+const cacheVerbete = new Map<string, Verbete>()
+
+async function verbete(nome: string, signal?: AbortSignal): Promise<Verbete> {
+  const pronto = cacheVerbete.get(nome)
+  if (pronto) return pronto
+
+  let falhou = false
+  for (const idioma of ['pt', 'en'] as const) {
+    try {
+      const resp = await fetch(`https://${idioma}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(nome)}`, { signal })
+      if (resp.status === 404) continue
+      if (!resp.ok) throw new Error(String(resp.status))
+      const r = await resp.json()
+      if (r.type !== 'standard') continue
+      const v: Verbete = {
+        fonte: idioma,
+        titulo: r.title,
+        resumo: r.extract ?? null,
+        imagem: r.thumbnail?.source ?? null,
+        url: r.content_urls?.desktop?.page ?? `https://${idioma}.wikipedia.org/wiki/${nome}`,
+      }
+      cacheVerbete.set(nome, v)
+      return v
+    } catch (e) {
+      if (signal?.aborted) throw e
+      falhou = true
+    }
+  }
+
+  const pbdb: Verbete = {
+    fonte: 'pbdb', titulo: nome, resumo: null, imagem: null,
+    url: `https://paleobiodb.org/classic/checkTaxonInfo?taxon_name=${encodeURIComponent(nome)}`,
+  }
+  if (!falhou) cacheVerbete.set(nome, pbdb)
+  return pbdb
 }
