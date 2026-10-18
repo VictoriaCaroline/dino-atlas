@@ -1,0 +1,24 @@
+# Variáveis de ambiente (o .env.example continua versionado)
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+target/
+dino-atlas-api/data/
+
+# Node / Vite
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Editores
+.vscode/
+.idea/
+*.iml
+
+# Sistema e logs
+Thumbs.db
+desktop.ini
+.DS_Store
+*.log
